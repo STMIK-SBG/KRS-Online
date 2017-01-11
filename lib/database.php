@@ -2,10 +2,10 @@
 class Database{
 
     // Pengaturan untuk koneksi ke database
-    private $host = "localhost";
-    private $db_name = "krs_online";
-    private $username = "root";
-    private $password = "";
+    public $host = "localhost";
+    public $db_name = "krs_online";
+    public $username = "root";
+    public $password = "";
     public $conn;
 
     // Koneksi ke database
