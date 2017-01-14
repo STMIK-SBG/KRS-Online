@@ -4,71 +4,93 @@ include_once '../lib/class.php';
 if(!isset($_SESSION['login_user'])&&!isset($_SESSION['login_pass'])&&!isset($_SESSION['login_level'])){
   $user->redirect('index.php');
 }
-if($_SESSION['login_level'] != 'admin'){
+if($_SESSION['login_level'] != 'admin' && $_SESSION['login_level'] != 'dosen'){
   $user->redirect('index.php');
 }
-$page_title = 'Mahasiswa';
-include_once '../temp/header.php'; ?>
-<header class="navbar navbar-dark navbar-sticky-top bg-primary">
-    <nav>
-      <div class="clearfix">
-        <button class="navbar-toggler float-xs-right hidden-sm-up collapsed" type="button" data-toggle="collapse" data-target="#bd-main-nav" aria-controls="bd-main-nav" aria-expanded="false" aria-label="Toggle navigation"></button>
-        <a class="navbar-brand hidden-sm-up" href="<?= $base_url; ?>">KRS Online</a>
-      </div>
-      <div class="navbar-toggleable-xs collapse" id="bd-main-nav" aria-expanded="false">
-        <div class="navbar-header hidden-xs-down">
-          <a class="nav-link navbar-brand" href="<?= $base_url; ?>">KRS Online</a>
-        </div>
-        <ul class="nav navbar-nav float-md-right">
-          <li class="nav-item">
-            <a class="nav-item nav-link" href="javascript:void(0)">Lihat KRS</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-item nav-link" href="javascript:void(0)">Cetak KRS</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-item nav-link" href="javascript:void(0)">Informasi Akun</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-item nav-link" href="javascript:void(0)">Panduan KRS Online</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-item nav-link" href="<?= $base_url; ?>logout.php">Keluar</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-</header>
+$page_title = 'Tambah KRS';
+include_once '../temp/header.php';
+include_once '../temp/admin_nav.php'; ?>
 <div class="container">
-  <h1 class="display-1">DOSEN</h1>
-
-<form>
+<?php
+if(isset($_POST['save'])&&isset($_POST['matakuliah'])&&isset($_POST['semester'])&&isset($_POST['jurusan'])&&$_POST['matakuliah']!=''&&$_POST['semester']!=''&&$_POST['jurusan']!=''){
+  $krs->addKrs($_POST['matakuliah'],$_POST['semester'],$_POST['jurusan']);
+}
+?>
+<form class="card card-block" method="post">
+  <h4 class="card-title">Tambah KRS</h4>
+  <hr>
 <div class="form-group row">
-  <label for="example-text-input" class="col-2 col-form-label">Kode MK</label>
-  <div class="col-10">
-    <input class="form-control" type="text" id="example-text-input">
+    <label for="matakuliah" class="col-md-2 col-form-label text-md-right">Mata Kuliah</label>
+    <div class="col-md-7">
+      <select class="form-control" id="matakuliah" name="matakuliah">
+        <option value="">Pilih Mata Kuliah</option>
+        <?php
+          $getMatakuliah = $matakuliah->getAll();
+          while ($rowMatakuliah = $getMatakuliah->fetch(PDO::FETCH_ASSOC)) {
+            extract($rowMatakuliah); ?>
+            <option value="<?= $id; ?>"><?= $nama_matakuliah; ?></option>
+          <?php }
+        ?>
+      </select>
+    </div>
   </div>
-</div>
 <div class="form-group row">
-  <label for="example-text-input" class="col-2 col-form-label">Mata Kuliah</label>
-  <div class="col-10">
-    <input class="form-control" type="text" id="example-text-input">
+    <label for="semester" class="col-md-2 col-form-label text-md-right">Semester</label>
+    <div class="col-md-7">
+      <select class="form-control" id="semester" name="semester">
+        <option value="">Pilih Semester</option>
+        <?php for ($a=1; $a <= 8; $a++) { ?>
+          <option value="<?= $a; ?>"><?= $a; ?></option>
+        <?php } ?>
+      </select>
+    </div>
   </div>
-</div>
-<div class="form-group row">
-  <label for="example-text-input" class="col-2 col-form-label">Semester</label>
-  <div class="col-10">
-    <input class="form-control" type="text" placeholder="Masukan Semester Anda" id="example-text-input">
-  </div>
-</div>
-<div class="form-group">
-    <label for="exampleSelect2">SKS</label>
-    <select multiple class="form-control" id="exampleSelect2">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-    </select>
-  </div>
-</div>
+  <div class="form-group row">
+      <label for="jurusan" class="col-md-2 col-form-label text-md-right">Jurusan</label>
+      <div class="col-md-7">
+        <select class="form-control" id="jurusan" name="jurusan">
+          <option value="">Pilih Jurusan</option>
+          <?php
+            $getJurusan = $jurusan->getAll();
+            while ($rowJurusan = $getJurusan->fetch(PDO::FETCH_ASSOC)) {
+              extract($rowJurusan); ?>
+              <option value="<?= $id; ?>"><?= $nama_jurusan; ?></option>
+            <?php }
+          ?>
+        </select>
+      </div>
+    </div>
+  <input type="submit" name="save" value="Simpan" class="form-group btn btn-primary col-md-2 offset-md-2">
 </form>
+<?php for ($i=1; $i <= 8; $i++) { ?>
+  <h1 class="display-4">Semester <?= $i; ?></h1>
+  <table class="table table-bordered">
+    <thead class="thead-default">
+      <tr>
+        <th>#</th>
+        <th>Nama Jurusan</th>
+        <th>Mata kuliah</th>
+        <th>SKS</th>
+      </tr>
+    </thead>
+    <tbody>
+  <?php
+  $count = $jurusan->getAll();
+  for ($j=1; $j <= $count->rowCount(); $j++) {
+  $getAll = $krs->getAllBySemester($i,$j);
+  while ($row = $getAll->fetch(PDO::FETCH_ASSOC)) {
+    extract($row);
+    print('<tr>');
+    print('<td>'.$id.'</td>');
+    print('<td>'.$nama_jurusan.'</td>');
+    print('<td>'.$nama_matakuliah.'</td>');
+    print('<td>'.$sks.'</td>');
+    print('</tr>');
+  }
+  }
+  ?>
+  </tbody>
+  </table>
+<?php } ?>
+</div>
 <?php include_once '../temp/footer.php'; ?>

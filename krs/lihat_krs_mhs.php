@@ -4,9 +4,7 @@ include_once '../lib/class.php';
 if(!isset($_SESSION['login_user'])&&!isset($_SESSION['login_pass'])&&!isset($_SESSION['login_level'])){
   $user->redirect('index.php');
 }
-if($_SESSION['login_level'] != 'admin' && $_SESSION['login_level'] != 'dosen'){
-  $user->redirect('index.php');
-}
+
 // Judul page
 $page_title = 'Lihat KRS';
 include_once '../temp/header.php';
@@ -26,7 +24,8 @@ switch ($_SESSION['login_level']) {
     break;
 } ?>
     <div class="container">
-      <?php for ($i=1; $i <= 8; $i++) { ?>
+      <?php for ($i=1; $i <= 8; $i++) {
+      $totalSKS = 0; ?>
         <h1 class="display-4">Semester <?= $i; ?></h1>
         <table class="table table-bordered">
           <thead class="thead-default">
@@ -40,8 +39,7 @@ switch ($_SESSION['login_level']) {
           <tbody>
         <?php
         $count = $jurusan->getAll();
-        for ($j=1; $j <= $count->rowCount(); $j++) {
-        $getAll = $krs->getAllBySemester($i,$j);
+        $getAll = $krs->getAllBySemester($i,$user->getCurrentUserIdJurusan());
         while ($row = $getAll->fetch(PDO::FETCH_ASSOC)) {
           extract($row);
           print('<tr>');
@@ -50,9 +48,13 @@ switch ($_SESSION['login_level']) {
           print('<td>'.$nama_matakuliah.'</td>');
           print('<td>'.$sks.'</td>');
           print('</tr>');
-        }
+          $totalSKS += $sks;
         }
         ?>
+        <tr>
+          <th colspan="3">Total SKS</th>
+          <td><?= $totalSKS; ?></td>
+        </tr>
         </tbody>
         </table>
       <?php } ?>

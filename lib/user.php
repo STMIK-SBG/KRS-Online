@@ -12,6 +12,57 @@ class User{
         $this->base_url = $url;
     }
 
+    function getAll()
+    {
+      $query = "SELECT
+                 users.*,
+                 jurusan.nama_jurusan
+              FROM " . $this->table_name . "
+              INNER JOIN jurusan ON jurusan.id = users.id_jurusan
+              ORDER BY id
+              ";
+
+      $do = $this->conn->prepare( $query );
+      $do->execute();
+      return $do;
+    }
+
+    function getCurrentUserIdJurusan()
+    {
+      $query = "SELECT
+                 users.*,
+                 jurusan.nama_jurusan
+              FROM " . $this->table_name . "
+              INNER JOIN jurusan ON jurusan.id = users.id_jurusan
+              WHERE nomor_induk=" . $_SESSION['login_user'] . "
+              ORDER BY id
+              ";
+
+      $do = $this->conn->prepare( $query );
+      $do->execute();
+
+      $user = $do;
+      while($row = $user->fetch(PDO::FETCH_ASSOC)){
+        extract($row);
+        if($nomor_induk===$_SESSION['login_user']){
+          return $id_jurusan;
+        }
+      }
+      return 1;
+    }
+
+    function addUser($nid,$nama,$kontak,$semester,$jurusan,$jabatan,$jenis_kelamin,$password)
+    {
+      $options = [
+          'cost' => 11,
+      ];
+
+      $hash = password_hash($password, PASSWORD_BCRYPT, $options);
+      $query = "INSERT INTO " . $this->table_name . " VALUES('','".$nid."','".$nama."','".$hash."','".$jurusan."','".$semester."','".$jenis_kelamin."','".$kontak."','".$jabatan."')";
+      $do = $this->conn->prepare( $query );
+      $do->execute();
+    }
+
     // Ambil semua user dari database
     function verifyLogin($nid, $pass)
     {
